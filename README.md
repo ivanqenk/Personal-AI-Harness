@@ -1,6 +1,6 @@
 # Plan: Spec Driven Development (SDD) con Claude Code
 
-Basado en tres fuentes:
+Basado en dos enfoques:
 
 1. **Método simplificado** (un solo `requirements.md` + `plan.md` generado por plan mode) —
    rápido, ideal para MVPs y proyectos individuales.
@@ -8,17 +8,11 @@ Basado en tres fuentes:
    `tasks.json` como memoria y `specs/<feature>/` como contexto externo curado) — más
    robusto, ideal para proyectos que van a vivir mucho tiempo o donde varias personas tocan
    el código.
-3. **[`hello-sdd` de MoureDev](https://github.com/mouredev/hello-sdd)** — su curso público
-   de SDD, del que se han incorporado tres ideas: un fichero `AGENTS.md` portable (en vez
-   de duplicar instrucciones por CLI), una `docs/constitution.md` con principios
-   innegociables del proyecto, y un paso explícito de **clarificación** de la spec antes de
-   pasar a diseño.
 
 Esta carpeta implementa la **opción 2**, adaptada a las primitivas reales de Claude Code
-(`.claude/agents/` para subagentes) y con `AGENTS.md` como fuente de verdad portable (igual
-que en `hello-sdd`), porque es la que escala mejor y de la que puedes "bajar" fácilmente a
-la opción 1 cuando te sobre. Abajo tienes las dos primeras explicadas y cómo elegir entre
-ellas.
+(`.claude/agents/` para subagentes) y con `AGENTS.md` como fuente de verdad portable, porque
+es la que escala mejor y de la que puedes "bajar" fácilmente a la opción 1 cuando te sobre.
+Abajo tienes las dos explicadas y cómo elegir entre ellas.
 
 ## Qué hay en esta carpeta
 
