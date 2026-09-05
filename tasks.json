@@ -1,0 +1,12 @@
+{
+  "tasks": [
+    {
+      "id": "F1",
+      "feature": "ejemplo-feature",
+      "description": "Descripción corta de una línea de qué hace esta feature.",
+      "status": "pending",
+      "use_sdd": true,
+      "spec_path": "specs/ejemplo-feature/"
+    }
+  ]
+}

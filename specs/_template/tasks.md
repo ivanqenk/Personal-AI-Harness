@@ -1,0 +1,6 @@
+# Tasks — <nombre-feature>
+
+- [ ] **T1** — <instrucción concreta y autocontenida para el implementer>
+      Hecho cuando: <condición de entrega verificable>
+- [ ] **T2** — ...
+      Hecho cuando: ...
