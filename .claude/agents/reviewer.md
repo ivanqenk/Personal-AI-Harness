@@ -1,7 +1,7 @@
 ---
 name: reviewer
 description: Valida que el código implementado cumple la spec de la feature, que los tests tienen sentido y pasan, y que se respetan las convenciones de rules/. Úsalo cuando el implementer haya terminado todas las tareas de una feature, antes de marcarla como done. Solo aprueba o rechaza, no implementa.
-tools: Read, Bash, Grep, Glob
+tools: Read, Edit, Bash, Grep, Glob
 model: sonnet
 ---
 

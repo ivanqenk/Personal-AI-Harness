@@ -26,14 +26,17 @@
    ejecutar cada agente antes de darse por terminado, así que tiene que reflejar de verdad
    cómo se verifica el proyecto. Si el código no vive en un filesystem accesible por bash
    (mainframe, transportes SAP), `init.sh` tiene que ser un wrapper a lo que sí tengas
-   accesible.
+   accesible. Comprueba que conserva el bit de ejecución (`chmod +x init.sh`): los agentes
+   lo invocan como `./init.sh` y, si no lo es, el `leader` se para en su primera
+   precondición.
 6. **Prueba con tu primer ticket real** — no edites `tasks.json` a mano; ábrelo con
    `claude` y pega el ticket completo (descripción, criterios de aceptación, lo que tengas)
    pidiéndole *"añade esto como feature nueva"* (sin arrancarlo todavía). El `leader`
    registra la entrada en `tasks.json` como `pending` y guarda el ticket completo en
    `progress/<feature>-session-context.md` para que el `spec-author` lo use tal cual, sin
-   depender de que tú lo resumas bien. Empieza con algo pequeño para probar el flujo de
-   punta a punta antes de meter un ticket grande.
+   depender de que tú lo resumas bien. `tasks.json` viene vacío a propósito: la primera
+   entrada la crea el leader con tu ticket. Empieza con algo pequeño para probar el flujo
+   de punta a punta antes de meter un ticket grande.
 7. **Haz commit** — de lo que corresponda según el punto 2 (con `.gitignore` si es uso
    personal, o de todo si es para equipo).
 8. **Abre Claude Code en la raíz y arranca** — ejecuta `claude` desde la raíz del proyecto.
@@ -64,8 +67,9 @@ partir de ahí, el resto del ciclo es el mismo para los dos.
 ### Flujo B — Continuar algo ya en curso
 
 1. Pide una de las dos:
-   - *"Implementa la siguiente tarea pendiente."* → el `leader` toma la primera tarea en
-     `pending` de `tasks.json`.
+   - *"Implementa la siguiente tarea pendiente."* → el `leader` toma la primera tarea que
+     no esté `done` en el orden del array de `tasks.json`. No hay campo de prioridad: si
+     quieres adelantar algo, muévelo arriba o pídelo por nombre.
    - *"Retoma \<id/feature\>."* → si quieres una en concreto, no la siguiente en la lista.
 2. El `leader` lee `tasks.json` y cruza eso con el checklist "Progreso" del
    `session-context` de esa tarea (si ya existe) para confirmar de verdad por dónde se

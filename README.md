@@ -17,8 +17,8 @@ Basado en tres fuentes:
 Esta carpeta implementa la **opción 2**, adaptada a las primitivas reales de Claude Code
 (`.claude/agents/` para subagentes) y con `AGENTS.md` como fuente de verdad portable (igual
 que en `hello-sdd`), porque es la que escala mejor y de la que puedes "bajar" fácilmente a
-la opción 1 cuando te sobre. Abajo tienes las tres explicadas, cómo elegir, y cómo se
-compara con `hello-sdd`.
+la opción 1 cuando te sobre. Abajo tienes las dos primeras explicadas y cómo elegir entre
+ellas.
 
 ## Qué hay en esta carpeta
 
@@ -56,13 +56,18 @@ init.sh                        ← script obligatorio: verificar entorno + corre
 2. Rellena `rules/global-conventions.md`, `rules/backend-instructions.md` y
    `rules/frontend-instructions.md` con las convenciones reales del proyecto — esto es lo
    más importante: si no defines aquí una decisión, la IA la va a inventar por ti.
-3. Rellena `init.sh` con los comandos reales (instalar deps, lint, tests) de tu stack.
-4. Añade tu primera feature a `tasks.json` con `status: "pending"`.
+3. Rellena `init.sh` con los comandos reales (instalar deps, lint, tests) de tu stack, y
+   comprueba que sigue siendo ejecutable (`chmod +x init.sh`): todos los agentes lo llaman
+   como `./init.sh`.
+4. Abre `claude` en la raíz del proyecto y pega tu primer ticket completo pidiéndole
+   **"añade esto como feature nueva"**. El `leader` lo registra en `tasks.json` como
+   `pending` y guarda el texto íntegro en `progress/<feature>-session-context.md`.
+   `tasks.json` arranca vacío y no se edita a mano: lo mantiene el leader.
 5. Haz commit de todo esto (`.claude/agents/` incluido) para que el equipo comparta los
    mismos agentes.
-6. Abre `claude` en la raíz del proyecto y pídele: **"implementa la siguiente tarea
-   pendiente"**. `CLAUDE.md` hará que arranque como `leader`, lea `tasks.json`, vea que la
-   tarea está en `pending` y lance al `spec-author`.
+6. Pídele: **"implementa la siguiente tarea pendiente"**. `CLAUDE.md` hará que arranque
+   como `leader`, lea `tasks.json`, coja la primera tarea que no esté `done` (el orden del
+   array es la prioridad) y lance al `spec-author`.
 
 ## El flujo, tal como lo vas a vivir
 
@@ -103,33 +108,6 @@ lugar:
 
 Puedes seguir usando `rules/` y `init.sh` de esta carpeta con este método simplificado sin
 necesidad de `.claude/agents/` ni `tasks.json` — son piezas independientes.
-
-## Cómo se compara con `hello-sdd` (curso de MoureDev)
-
-[`hello-sdd`](https://github.com/mouredev/hello-sdd) es un curso público con su propio
-flujo: **Constitución → Spec → Clarificación → Plan → Tareas → Implementación → Validación
-→ Cambio**, ejecutado a mano por el humano (sin subagentes ni `tasks.json`), con un
-`AGENTS.md` como contexto y una skill `spec-generator` que guía la entrevista de
-requisitos. Este repo adopta su vocabulario y sus tres piezas más útiles (`AGENTS.md`
-portable, constitución, clarificación explícita), pero le añade encima la capa de
-orquestación con subagentes (`leader`/`spec-author`/`implementer`/`reviewer` +
-`tasks.json`) para no depender de que el humano dispare cada fase manualmente.
-
-| Concepto | `hello-sdd` | Esta carpeta |
-|---|---|---|
-| Fichero de contexto | `AGENTS.md` (+ `CLAUDE.md` como referencia) | igual |
-| Principios de proyecto | `docs/constitution.md` | igual |
-| Spec | `specs/NNN-feature/spec.md` (contexto, historias, RF-x EARS, casos límite, fuera de alcance, criterios de finalización) | `specs/<feature>/requirements.md` (mismo contenido) |
-| Plan técnico | `plan.md` | `design.md` |
-| Tareas | `tasks.md` (T1...T8, "Hecho cuando:") | igual |
-| Clarificación | paso manual explícito | paso obligatorio dentro de `spec-author` |
-| Orquestación | el humano dispara cada fase | el subagente `leader` decide la fase según `tasks.json` |
-| Generación de la spec | skill `spec-generator` que entrevista al humano | subagente `spec-author` (puedes convertirlo en skill si prefieres el modo entrevista) |
-
-Si prefieres el estilo `hello-sdd` de disparar cada fase tú mismo sin `leader`, puedes usar
-igualmente `specs/SPECS_FORMAT.md`, `docs/constitution.md` y `rules/` sin instalar
-`.claude/agents/leader.md` ni `tasks.json` — son piezas independientes, igual que con el
-método simplificado.
 
 ## Cómo elegir
 

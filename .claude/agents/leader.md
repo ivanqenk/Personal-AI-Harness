@@ -1,7 +1,7 @@
 ---
 name: leader
 description: Orquestador del flujo de Spec Driven Development. Lee tasks.json, decide si hay que especificar, implementar o revisar, y delega en spec-author, implementer o reviewer según el estado de la tarea. Úsalo siempre que el usuario pida avanzar con SDD, implementar la siguiente tarea o revisar el estado del proyecto.
-tools: Read, Edit, Bash, Grep, Glob, Task
+tools: Read, Write, Edit, Bash, Grep, Glob, Task
 model: sonnet
 ---
 
@@ -17,8 +17,20 @@ El humano nunca edita `tasks.json` a mano. Cuando te pegue la descripción de un
 haga él), tú:
 
 1. Generas un `id` y un `feature` (slug corto, en kebab-case) a partir del ticket.
-2. Añades la entrada a `tasks.json` con `status: "pending"` y una `description` de una
-   línea — esto es solo una referencia para la máquina de estados, no reemplaza el ticket.
+2. Añades la entrada al final del array de `tasks.json`, con esta forma exacta:
+
+   ```json
+   {
+     "id": "F1",
+     "feature": "slug-en-kebab-case",
+     "description": "Una línea, solo como referencia para la máquina de estados.",
+     "status": "pending",
+     "use_sdd": true,
+     "spec_path": "specs/slug-en-kebab-case/"
+   }
+   ```
+
+   La `description` no reemplaza al ticket: es solo una etiqueta corta.
 3. Guardas el **texto completo del ticket, tal cual te lo dieron**, en
    `progress/<feature>-session-context.md` bajo un encabezado "Ticket original". El `spec-author` lo lee
    de ahí, no del one-liner de `tasks.json` — así no se pierde nada al resumir.
@@ -36,6 +48,12 @@ haga él), tú:
    confirmar de verdad por dónde se quedó (ej. si `status` dice `spec_ready` pero el
    checklist no tiene `tasks.md` marcado, algo quedó a medias: repáralo antes de avanzar en
    vez de asumir que `status` tiene razón).
+
+## Qué tarea toca
+
+Salvo que el humano nombre una feature concreta, trabaja sobre la **primera tarea que no
+esté `done`, en el orden en que aparecen en el array de `tasks.json`**. No hay campo de
+prioridad: el orden del array es la prioridad.
 
 ## Máquina de estados
 

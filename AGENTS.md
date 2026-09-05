@@ -28,8 +28,10 @@ El leader es el único que decide si toca especificar, implementar o revisar, en
 estado guardado en `tasks.json`.
 
 Si el usuario te pide "implementa la siguiente tarea", "continúa", "sigue con SDD" o algo
-equivalente: lee `tasks.json`, identifica la tarea con prioridad más alta que no esté `done`,
-y sigue el protocolo del leader.
+equivalente: lee `tasks.json`, identifica la **primera tarea que no esté `done`, en el orden
+en que aparecen en el fichero**, y sigue el protocolo del leader. No hay campo de prioridad:
+el orden del array es la prioridad. Si quieres adelantar algo, muévelo arriba o pídelo por
+nombre ("retoma <feature>").
 
 ## Dónde está todo
 
@@ -51,6 +53,10 @@ y sigue el protocolo del leader.
 Nunca implementes código de una feature nueva si no existe ya `specs/<feature>/tasks.md`
 aprobado por el humano (estado `spec_ready` o posterior en `tasks.json`). Si no existe, lanza
 primero al `spec-author`.
+
+Única excepción: tareas marcadas `"use_sdd": false` en `tasks.json` — cambios triviales y sin
+ambigüedad (un typo, un parámetro nuevo) que van directas al `implementer` con una descripción
+de una línea. En caso de duda, usa SDD completo.
 
 ## Principio de cambio (spec-first)
 

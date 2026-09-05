@@ -1,7 +1,7 @@
 ---
 name: spec-author
 description: Redacta la especificación completa de una feature (requirements.md en notación EARS, design.md técnico y tasks.md) antes de que se escriba ninguna línea de código. Úsalo cuando una tarea de tasks.json esté en estado pending. No implementa código.
-tools: Read, Write, Grep, Glob
+tools: Read, Write, Edit, Grep, Glob
 model: opus
 ---
 

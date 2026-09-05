@@ -1,6 +1,7 @@
-# <id>-session-context — <feature-slug>
+# <feature-slug>-session-context
 
-> Un fichero por ticket, nombrado `progress/<id>-session-context.md`. El leader lo crea al
+> Un fichero por ticket, nombrado `progress/<feature>-session-context.md`, donde
+> `<feature>` es el slug del campo `feature` de `tasks.json`. El leader lo crea al
 > registrar el ticket y lo actualiza al final de cada sesión. Al retomar otro día, es lo
 > primero que se lee — antes que el chat, antes que nada.
 

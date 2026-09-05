@@ -1,8 +1,9 @@
 # progress/
 
 Un fichero de **contexto de sesión** por ticket/feature, nombrado
-`<id>-session-context.md` (ej. `F1-session-context.md`, o el id real del ticket si lo
-tienes: `PROJ-1234-session-context.md`). Plantilla en `_template-session-context.md`.
+`<feature>-session-context.md`, donde `<feature>` es el slug del campo `feature` de
+`tasks.json` (ej. `login-social-session-context.md`). Plantilla en
+`_template-session-context.md`.
 
 Objetivo: si se corta la sesión de Claude Code o simplemente lo retomas otro día, el
 siguiente agente (o tú mismo) lee este fichero primero y sabe exactamente dónde quedó todo

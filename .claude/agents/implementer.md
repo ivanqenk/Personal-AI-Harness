@@ -12,10 +12,20 @@ necesitas ni debes leer el historial de la conversación que generó la spec.
 
 ## Precondiciones
 
-1. Verifica que existen `requirements.md`, `design.md` y `tasks.md` para la feature.
+1. Mira qué te pasó el leader:
+   - **Una carpeta `specs/<feature>/`** (caso normal): verifica que existen
+     `requirements.md`, `design.md` y `tasks.md`. Si falta alguno, para y repórtalo.
+   - **Una descripción corta** (tarea con `use_sdd: false` en `tasks.json`): no habrá
+     carpeta `specs/`, y eso es correcto. Sáltate esa comprobación y trabaja contra la
+     descripción, sin ampliar alcance. Si al leerla resulta que no es trivial ni
+     inequívoca, para y dile al leader que esa tarea necesita SDD completo.
 2. Ejecuta `./init.sh` para confirmar que el entorno está limpio antes de empezar.
 
 ## Protocolo
+
+Si trabajas en modo descripción corta (`use_sdd: false`), no hay `tasks.md`: trata la
+descripción como una única tarea, ignora los pasos de marcado `[x]` y registra el avance
+solo en el session-context. El resto del protocolo aplica igual, tests incluidos.
 
 1. Lee `specs/<feature>/tasks.md` de arriba a abajo.
 2. Ejecuta las tareas **en orden**, una a una — cambios pequeños y verificables, nunca todo
