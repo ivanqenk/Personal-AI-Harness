@@ -22,10 +22,13 @@ AGENTS.md                     ← fuente de verdad portable (Claude Code, Codex,
 docs/
   constitution.md             ← principios innegociables del proyecto (leer antes que nada)
 .claude/agents/
-  leader.md                   ← orquestador (máquina de estados)
+  leader.md                   ← manual del rol leader, que asume el hilo principal
   spec-author.md              ← requirements.md → clarificación → design.md → tasks.md
-  implementer.md               ← ejecuta tasks.md, contexto mínimo
-  reviewer.md                  ← aprueba o rechaza contra la spec
+  implementer.md              ← ejecuta tasks.md, contexto mínimo
+  reviewer.md                 ← aprueba o rechaza contra la spec
+.claude/settings.json         ← registra el hook que hace insaltable la regla de oro
+.claude/hooks/
+  guard-spec-first.sh         ← bloquea escrituras en código si nada está in_progress
 specs/
   SPECS_FORMAT.md              ← formato EARS + estructura de los 3 ficheros + clarificación
   _template/                   ← plantillas para copiar en cada feature nueva
@@ -39,7 +42,24 @@ prompts.md                     ← chuleta con el prompt exacto de cada fase
 progress/                      ← contexto de trabajo en curso, un fichero por feature
 history.md                     ← histórico append-only de features completadas
 init.sh                        ← script obligatorio: verificar entorno + correr tests
+.gitignore.example             ← para uso personal (renómbralo); en equipo, commitea todo
 ```
+
+## Los dos gates automáticos
+
+Casi todo el arnés son instrucciones en prosa, y una instrucción en prosa se puede olvidar.
+Estas dos piezas no:
+
+- **`init.sh`** falla mientras no lo personalices (`PROYECTO_CONFIGURADO=true`) o queden
+  placeholders `<...>` en `rules/` o `docs/constitution.md`. Un `init.sh` que imprime "OK"
+  sin ejecutar nada no es un gate: es confianza falsa, y el leader, el implementer y el
+  reviewer estarían aprobando contra nada. También valida `tasks.json` y comprueba la
+  trazabilidad RF→test.
+- **El hook `PreToolUse`** (`.claude/settings.json` → `.claude/hooks/guard-spec-first.sh`)
+  bloquea cualquier escritura sobre código de producción si no hay ninguna tarea
+  `in_progress` en `tasks.json`. Los ficheros del arnés se escriben siempre. Si te bloquea,
+  el arreglo es mover la tarea al estado que toca; para desactivarlo del todo:
+  `SDD_GUARD=off claude`.
 
 ## Cómo instalarlo en cualquier proyecto (nuevo o existente)
 
@@ -50,9 +70,10 @@ init.sh                        ← script obligatorio: verificar entorno + corre
 2. Rellena `rules/global-conventions.md`, `rules/backend-instructions.md` y
    `rules/frontend-instructions.md` con las convenciones reales del proyecto — esto es lo
    más importante: si no defines aquí una decisión, la IA la va a inventar por ti.
-3. Rellena `init.sh` con los comandos reales (instalar deps, lint, tests) de tu stack, y
-   comprueba que sigue siendo ejecutable (`chmod +x init.sh`): todos los agentes lo llaman
-   como `./init.sh`.
+3. Rellena `init.sh` con los comandos reales (instalar deps, lint, tests) de tu stack, pon
+   `PROYECTO_CONFIGURADO=true` y `RUTAS_TESTS` con las rutas de tus tests, y comprueba que
+   sigue siendo ejecutable (`chmod +x init.sh`): los agentes lo llaman como `./init.sh`.
+   Hasta que hagas esto, `init.sh` falla a propósito.
 4. Abre `claude` en la raíz del proyecto y pega tu primer ticket completo pidiéndole
    **"añade esto como feature nueva"**. El `leader` lo registra en `tasks.json` como
    `pending` y guarda el texto íntegro en `progress/<feature>-session-context.md`.
@@ -67,7 +88,8 @@ init.sh                        ← script obligatorio: verificar entorno + corre
 
 1. **Pending → spec-author**: te escribe `requirements.md` (formato EARS, ver
    `specs/SPECS_FORMAT.md`), `design.md` y `tasks.md` dentro de `specs/<feature>/`. Para
-   solo.
+   solo. Si al releer los requisitos encuentra preguntas que solo tú puedes contestar, para
+   antes de `design.md` y la tarea queda en **`needs_clarification`** hasta que respondas.
 2. **spec_ready → tú apruebas**: lees `requirements.md` y `design.md`, pides cambios si
    hace falta, y cuando estés de acuerdo le dices al leader que pase la tarea a
    `in_progress`. Este paso es obligatorio y no se puede saltar — así se evita que el
@@ -75,10 +97,14 @@ init.sh                        ← script obligatorio: verificar entorno + corre
 3. **in_progress → implementer**: ejecuta `tasks.md` tarea a tarea, con el mínimo contexto
    posible (solo la carpeta `specs/<feature>/` y las `rules/`), corriendo `init.sh` y
    marcando cada tarea como hecha.
-4. **reviewer**: valida trazabilidad (cada requisito EARS tiene un test), que el diseño se
-   respetó, que los tests tienen sentido (no solo que pasan) y que se siguieron las
-   `rules/`. Aprueba o rechaza con feedback concreto.
-5. **done**: el leader mueve el resumen a `history.md` y limpia `progress/<feature>-session-context.md`.
+4. **in_review → reviewer**: valida trazabilidad (cada requisito EARS tiene un test que lo
+   cita por id), que el diseño se respetó, que los tests tienen sentido (no solo que pasan)
+   y que se siguieron las `rules/`. Mide el diff contra el `base_ref` que el leader anotó al
+   arrancar la implementación, así que el alcance es objetivo. Aprueba o rechaza con
+   feedback concreto.
+5. **done**: el leader te muestra el resumen final y **espera tu confirmación**; solo
+   entonces anexa el session-context completo a `history.md` y borra
+   `progress/<feature>-session-context.md`.
 
 ## Cuándo saltarte SDD (`use_sdd: false`)
 

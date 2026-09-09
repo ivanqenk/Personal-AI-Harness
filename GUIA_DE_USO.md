@@ -9,10 +9,13 @@
    - **Solo para ti (tu caso)**: copia `.claude/agents/*.md` a `~/.claude/agents/` (fuera
      del repo, disponible en cualquier proyecto). El resto (`CLAUDE.md`, `AGENTS.md`,
      `docs/`, `specs/`, `rules/`, `tasks.json`, `instincts.md`, `prompts.md`, `init.sh`,
-     `progress/`, `history.md`) sí vive dentro del repo, pero añádelo a `.gitignore` para
-     que no se suba en los commits.
+     `progress/`, `history.md`) sí vive dentro del repo, pero sin subirse: renombra
+     `.gitignore.example` a `.gitignore`, que ya trae la lista. Ojo: el hook vive en
+     `.claude/settings.json` + `.claude/hooks/`, y ese sí tiene que quedarse en el repo
+     para que funcione, aunque no lo commitees.
    - **Para equipo**: copia toda la carpeta a la raíz tal cual y haz commit de todo,
-     incluido `.claude/agents/`, para que todos usen los mismos subagentes.
+     incluido `.claude/` entero (agentes, `settings.json` y `hooks/`), para que todos usen
+     los mismos subagentes y el mismo gate.
 3. **Rellena `docs/constitution.md`** — 4-6 principios innegociables reales del proyecto
    (seguridad, compatibilidad, dependencias, estilo). Si no sabes qué poner todavía, déjalo
    con 2-3 básicos y amplíalo según avances; no hace falta perfección desde el día 1.
@@ -22,13 +25,20 @@
    prohibidos reales. Esto es lo que evita que la IA invente convenciones. En stacks poco
    estándar (COBOL, ABAP) dedícale más tiempo a esto: cuanto menos "sentido común" propio
    tenga el modelo del stack, más detallado tiene que ser este fichero.
-5. **Rellena `init.sh`** — comandos reales: instalar dependencias, linter, tests. Lo va a
-   ejecutar cada agente antes de darse por terminado, así que tiene que reflejar de verdad
-   cómo se verifica el proyecto. Si el código no vive en un filesystem accesible por bash
-   (mainframe, transportes SAP), `init.sh` tiene que ser un wrapper a lo que sí tengas
-   accesible. Comprueba que conserva el bit de ejecución (`chmod +x init.sh`): los agentes
-   lo invocan como `./init.sh` y, si no lo es, el `leader` se para en su primera
-   precondición.
+5. **Rellena `init.sh`** — comandos reales: instalar dependencias, linter, tests. Lo van a
+   ejecutar el implementer y el reviewer antes de darse por terminados, así que tiene que
+   reflejar de verdad cómo se verifica el proyecto. Si el código no vive en un filesystem
+   accesible por bash (mainframe, transportes SAP), `init.sh` tiene que ser un wrapper a lo
+   que sí tengas accesible. Comprueba que conserva el bit de ejecución (`chmod +x init.sh`):
+   los agentes lo invocan como `./init.sh`.
+
+   **`init.sh` falla a propósito hasta que hagas esto**, y no te dejará arrancar el flujo
+   mientras queden placeholders `<...>` en `rules/` o `docs/constitution.md`. Es
+   deliberado: un `init.sh` recién copiado imprime "entorno OK" sin ejecutar una sola
+   comprobación, y todo el arnés cuelga de esa señal — el reviewer rechaza automáticamente
+   si `init.sh` falla, así que un `init.sh` que nunca falla es un reviewer que nunca
+   rechaza. Cuando esté relleno, pon `PROYECTO_CONFIGURADO=true` y `RUTAS_TESTS` con las
+   rutas donde viven tus tests.
 6. **Prueba con tu primer ticket real** — no edites `tasks.json` a mano; ábrelo con
    `claude` y pega el ticket completo (descripción, criterios de aceptación, lo que tengas)
    pidiéndole *"añade esto como feature nueva"* (sin arrancarlo todavía). El `leader`
@@ -79,6 +89,11 @@ partir de ahí, el resto del ciclo es el mismo para los dos.
 
 ### Lo que viene después (igual en ambos flujos)
 
+> **Antes de eso, si hay preguntas abiertas**: si el `spec-author` se topa con algo que
+> solo tú puedes decidir, para antes de diseñar y la tarea queda en `needs_clarification`.
+> Te enseña las preguntas, las contestas, y sigue desde ahí sin rehacer el
+> `requirements.md` que ya escribió.
+
 2. **Revisa y aprueba la spec** — cuando la tarea pase a `spec_ready`, lee
    `requirements.md` y `design.md` (el leader te los resume). Si algo no cuadra, pide
    cambios concretos. Si está bien: *"Apruebo la spec de \<feature\>, pásala a
@@ -95,8 +110,9 @@ partir de ahí, el resto del ciclo es el mismo para los dos.
 5. **Cierra y archiva** — *"Marca \<feature\> como done."* Antes de archivar, el leader te
    muestra en pantalla un resumen completo: qué se pidió, qué se construyó, el código
    relevante, las decisiones clave, cómo se verificó, y si hay alguna entrada de
-   `instincts.md` lista para promoverse a `rules/` (3+ apariciones). Solo después mueve
-   todo a `history.md` y borra el `session-context`.
+   `instincts.md` lista para promoverse a `rules/` (3+ apariciones). Espera tu confirmación
+   y solo entonces anexa el `session-context` **completo** a `history.md` (incluido el
+   ticket original literal) y lo borra.
 6. Vuelve al Flujo A o al Flujo B según toque, y se repite.
 
 ## 3. Notas prácticas
@@ -114,9 +130,14 @@ partir de ahí, el resto del ciclo es el mismo para los dos.
   con solo 1-2 features `in_progress` a la vez, para que la revisión humana no se acumule
   y `history.md` quede como un log legible de decisiones, no un volcado.
 - **Costo por rol**: `spec-author` corre en opus a propósito (una spec mal pensada
-  contamina todo lo demás), `leader`/`implementer`/`reviewer` en sonnet. Si una feature
-  toca seguridad, dinero o una decisión difícil de revertir, invoca `/model opus`
-  manualmente antes de pedir la review — no lo hace por defecto.
+  contamina todo lo demás), `implementer` y `reviewer` en sonnet. El `leader` no tiene
+  modelo propio: lo ejerce el hilo principal de tu sesión, así que corre con el modelo que
+  tengas puesto. Si una feature toca seguridad, dinero o una decisión difícil de revertir,
+  invoca `/model opus` manualmente antes de pedir la review — no lo hace por defecto.
+- **El gate automático**: un hook bloquea las escrituras sobre código de producción si no
+  hay ninguna tarea `in_progress`. Si ves un mensaje "BLOQUEADO por el arnés SDD", no es un
+  error: es que el flujo está en la fase equivocada (falta aprobar la spec, o la tarea sigue
+  en review). Muévela al estado que toca. Para desactivarlo puntualmente: `SDD_GUARD=off claude`.
 - **`instincts.md`**: el `reviewer` va anotando ahí correcciones que se repiten pero que
   todavía no están en `rules/`. Cuando el `leader` te avise de que una entrada acumuló 3+
   apariciones, revísala y decide si la promueves a `rules/` — es un paso manual, no

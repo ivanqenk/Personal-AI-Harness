@@ -17,6 +17,10 @@ verificable, para poder traducirlo 1:1 a un test. Patrones más comunes:
 Ejemplo: *"Cuando el usuario ejecuta `notas list` sin pasar `--limit`, el sistema debe
 imprimir como máximo 5 notas ordenadas por fecha descendente."*
 
+Cada `RF-x` es también el identificador que va a citar el test que lo cubre
+(`test_RF3_...`, `it('RF-3: ...')`) — `init.sh` comprueba esa cita. Numéralos de forma
+estable: renumerar un RF después de implementarlo rompe la trazabilidad.
+
 `requirements.md` debe incluir siempre:
 - Contexto y usuarios.
 - Historias de usuario (opcional pero recomendado para features con interacción humana).
@@ -32,6 +36,10 @@ Antes de pasar de `requirements.md` a `design.md`, el spec-author relee el docum
 modo QA adversarial buscando ambigüedad, contradicciones o huecos, y mueve cualquier duda
 real a "Preguntas abiertas" en vez de asumir una respuesta. Este paso no genera un fichero
 nuevo — es una revisión obligatoria antes de diseñar.
+
+Si quedan preguntas abiertas, el spec-author **para** y la tarea pasa a
+`needs_clarification` en `tasks.json`. Cuando el humano contesta, se retoma desde
+`design.md`: el `requirements.md` ya escrito se conserva.
 
 ## 2. `design.md` — decisiones técnicas
 
@@ -52,8 +60,9 @@ Lista ordenada `T1, T2, T3...`. Cada tarea:
 
 ## Estado en `tasks.json`
 
-El ciclo de vida de una feature (`pending → spec_ready → in_progress → done`) se controla
-desde `tasks.json`, no desde estos ficheros. Ver `.claude/agents/leader.md`.
+El ciclo de vida de una feature (`pending → needs_clarification → spec_ready → in_progress
+→ in_review → done`) se controla desde `tasks.json`, no desde estos ficheros. Ver
+`.claude/agents/leader.md`.
 
 ## Constitución
 

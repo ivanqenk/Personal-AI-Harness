@@ -11,6 +11,9 @@
 
 ## Requisitos funcionales (notación EARS, RF-x)
 
+> Cada id es el que citará el test que lo cubre (`test_RF1_...`, `it('RF-1: ...')`), y eso
+> lo comprueba `init.sh`. No renumeres un RF ya implementado.
+
 - **RF-1**: Cuando <evento>, el sistema debe <respuesta>.
 - **RF-2**: Si <condición de error>, entonces el sistema debe <manejo del error>.
 

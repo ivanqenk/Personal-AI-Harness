@@ -1,0 +1,19 @@
+# .gitignore.example — renómbralo a .gitignore si usas el arnés SOLO para ti.
+#
+# Uso personal: los subagentes viven en ~/.claude/agents/ y el resto del arnés vive en el
+# repo pero sin subirse. Uso en equipo: no uses este fichero — commitea todo, incluido
+# .claude/, para que todos compartan los mismos agentes, el mismo hook y las mismas reglas.
+
+tasks.json
+progress/
+history.md
+instincts.md
+specs/
+rules/
+docs/constitution.md
+prompts.md
+AGENTS.md
+CLAUDE.md
+GUIA_DE_USO.md
+init.sh
+.claude/

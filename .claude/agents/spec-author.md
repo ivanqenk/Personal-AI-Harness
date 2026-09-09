@@ -37,6 +37,11 @@ razonable.
    adversarial: busca requisitos ambiguos, contradictorios, no verificables o que dependan
    de una decisión que no está tomada. Muévelos a "Preguntas abiertas" en vez de asumir
    una respuesta. No pases a `design.md` con preguntas abiertas sin resolver por el humano.
+
+   Si quedan preguntas abiertas, **para aquí** y dile al leader que ponga la tarea en
+   `needs_clarification`. No es un fallo: es el estado que existe justamente para esto.
+   Cuando el humano conteste, retomarás desde `design.md` — el `requirements.md` que ya
+   escribiste se conserva, no lo rehagas.
 3. **`design.md`** — decisiones técnicas: qué ficheros se van a tocar o crear, qué
    clases/funciones/componentes hacen falta, qué ficheros NO se deben tocar, y cómo encaja
    con la arquitectura ya existente (esto ya lo viste en el paso de exploración; aquí lo
@@ -46,6 +51,10 @@ razonable.
    entrega. Prefiere más tareas pequeñas y verificables a pocas tareas grandes: eso es lo
    que permite implementación incremental en vez de "todo el ticket de un jalón". Marca
    cada tarea con una casilla `[ ]` para que el implementer las vaya marcando `[x]`.
+   Cada tarea que añada tests debe decir **qué RF cubre**, y su condición de entrega debe
+   pedir que el nombre del test cite ese id (`test_RF3_…`, `it('RF-3: …')`). `init.sh`
+   comprueba esa cita: sin ella, la trazabilidad RF→test no es verificable y el reviewer
+   tendría que juzgarla a ojo.
 
 ## Reglas
 

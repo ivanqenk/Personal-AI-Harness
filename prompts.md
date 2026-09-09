@@ -11,18 +11,22 @@ en la raíz del repo (donde está `CLAUDE.md`).
 | Añadir un ticket nuevo y arrancarlo ya | Igual que arriba, pero añade: `...y arráncala ya.` |
 | Ver estado | `¿Cuál es el estado actual de tasks.json? Resume cada feature y su fase.` |
 | Ver instincts pendientes de promoción | `¿Hay alguna entrada en instincts.md con 3+ apariciones lista para pasar a rules/?` |
+| Contestar preguntas abiertas | `Respuestas a las preguntas abiertas de <feature>: <1> ... <2> ...` — saca la tarea de `needs_clarification` y el spec-author sigue desde `design.md`. |
 | Aprobar spec | `Apruebo la spec de <feature>. Pásala a in_progress.` |
 | Pedir cambios en la spec | `La spec de <feature> no está bien: <qué cambiar>. Actualiza requirements.md/design.md y vuelve a pedirme aprobación.` |
 | Saltar SDD en una tarea trivial | `Marca <feature> con use_sdd: false e impleméntala directamente: <descripción corta>.` |
 | Forzar revisión | `Lanza al reviewer sobre <feature> aunque el implementer no lo haya pedido todavía.` |
 | Rechazar en review | `El reviewer tiene razón / no la tiene en <punto concreto>. <qué hacer>.` |
 | Cambiar una feature ya terminada | `Necesito cambiar el comportamiento de <feature> ya hecha: <qué cambia>. Empieza editando su spec, no el código.` |
-| Cerrar y archivar | `Marca <feature> como done.` — el leader te muestra primero un resumen final con código y explicación, y luego archiva en history.md. |
+| Cerrar y archivar | `Marca <feature> como done.` — el leader te muestra primero un resumen final con código y explicación, te pide confirmación, y solo entonces archiva el session-context completo en history.md. |
+| Desbloquear el hook | Si ves `BLOQUEADO por el arnés SDD`, no lo rodees: `¿En qué estado está <feature>? Muévela a la fase que toca.` Para desactivar el gate del todo hay que reabrir con `SDD_GUARD=off claude`. |
 
 ## Notas
 
 - No hace falta que nombres al agente explícitamente ("lanza al spec-author..."): el
   `leader` decide a quién delegar según el estado en `tasks.json`. Nómbralo solo cuando
-  quieras forzar algo fuera del flujo normal (ej. "forzar revisión").
+  quieras forzar algo fuera del flujo normal (ej. "forzar revisión"). Al `leader` en
+  cambio nunca lo invoques como subagente: es el rol del hilo principal, y delegado se
+  quedaría sin poder llamar a los demás.
 - Si usas otra CLI (Codex, Cursor, opencode...) en vez de Claude Code, estos mismos prompts
   valen igual porque el contexto vive en `AGENTS.md`, no en algo específico de Claude Code.

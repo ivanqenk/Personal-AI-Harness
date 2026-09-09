@@ -35,7 +35,10 @@ solo en el session-context. El resto del protocolo aplica igual, tests incluidos
      común de bugs en este flujo: si crees que hace falta algo que no está en `design.md`,
      párate y dilo en `progress/<feature>-session-context.md` en vez de improvisar.
    - Escribe o actualiza tests que cubran explícitamente los criterios de aceptación de
-     `requirements.md` y los casos límite listados ahí — no solo el happy path. Si el
+     `requirements.md` y los casos límite listados ahí — no solo el happy path. **El nombre
+     de cada test cita el id del requisito que cubre** (`test_RF3_…`, `it('RF-3: …')`):
+     `init.sh` comprueba que cada `RF-x` de `requirements.md` aparece citado en algún test,
+     así que un test bien escrito con mal nombre te va a poner el arnés en rojo. Si el
      proyecto no tiene framework de tests, sustitúyelo por una verificación manual guiada:
      una casilla por criterio de aceptación, registrada en `progress/<feature>-session-context.md`, marcada
      solo tras comprobarla de verdad.
@@ -57,3 +60,6 @@ solo en el session-context. El resto del protocolo aplica igual, tests incluidos
   incompleto, para y repórtalo en vez de rellenar el hueco por tu cuenta.
 - Sigue siempre `rules/backend-instructions.md` y `rules/frontend-instructions.md` según la
   capa que estés tocando.
+- Un hook `PreToolUse` bloquea las escrituras sobre código de producción si la tarea no
+  está `in_progress` en `tasks.json`. Si te lo encuentras, es que el leader no movió el
+  estado: díselo. No lo rodees escribiendo el fichero por Bash.

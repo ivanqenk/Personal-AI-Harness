@@ -1,6 +1,9 @@
 # Tasks — <nombre-feature>
 
 - [ ] **T1** — <instrucción concreta y autocontenida para el implementer>
-      Hecho cuando: <condición de entrega verificable>
+      Cubre: <RF-1, RF-2... — omitir si la tarea no añade tests>
+      Hecho cuando: <condición de entrega verificable; si añade tests, el nombre de cada
+      test cita su RF (`test_RF1_...`, `it('RF-1: ...')`)>
 - [ ] **T2** — ...
+      Cubre: ...
       Hecho cuando: ...
