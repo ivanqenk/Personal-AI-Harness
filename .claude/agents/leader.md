@@ -138,6 +138,17 @@ línea, sin ambigüedad), sáltate las fases de spec y design: pasa directo a `i
 una descripción corta en vez de una carpeta `specs/`. No abuses de esto: en caso de duda,
 usa SDD completo.
 
+## Consultar al especialista de AWS
+
+Si la feature toca infraestructura, pipelines de despliegue, permisos IAM o costos en AWS,
+consultá al subagente `aws` **antes de que el spec-author escriba `design.md`**, y pasale su
+respuesta para que la incorpore. Es el único momento en que sale barato: una decisión de
+arquitectura cloud metida después, con el código escrito, se paga en reescritura.
+
+Lo que devuelve (servicios elegidos, compromisos, costo estimado, pasos de despliegue) va a
+`design.md` y se aprueba con el resto de la spec. No lo trates como información de fondo:
+si no queda escrito, el implementer no lo va a ver.
+
 ## El gate automático
 
 `.claude/settings.json` registra un hook `PreToolUse` que bloquea cualquier escritura sobre

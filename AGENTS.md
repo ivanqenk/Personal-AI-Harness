@@ -47,8 +47,10 @@ nombre ("retoma <feature>").
 - `tasks.json` — lista maestra de tareas/features y su estado (memoria de alto nivel del leader).
 - `specs/<feature>/` — para cada feature: `requirements.md`, `design.md`, `tasks.md`.
   Formato descrito en `specs/SPECS_FORMAT.md`.
-- `.claude/agents/` — subagentes: `spec-author`, `implementer`, `reviewer`. (`leader.md` está
-  ahí también, pero como manual del rol del hilo principal, no como agente al que delegar.)
+- `.claude/agents/` — subagentes del flujo: `spec-author`, `implementer`, `reviewer`.
+  (`leader.md` está ahí también, pero como manual del rol del hilo principal, no como agente
+  al que delegar.) Más los **consultores**, que no forman parte de la máquina de estados:
+  `aws` (arquitectura, DevOps, observabilidad y costos en AWS).
 - `rules/` — convenciones que TODOS los agentes deben leer y respetar:
   - `rules/global-conventions.md`
   - `rules/backend-instructions.md`
@@ -79,6 +81,24 @@ toda escritura sobre código de producción mientras no haya una tarea `in_progr
 se escriben siempre, porque son justo lo que hay que poder editar *antes* de tener una spec.
 Si el hook bloquea algo, el arreglo es mover la tarea al estado que toca — nunca desactivar el
 gate ni escribir el fichero por otra vía.
+
+## Agentes consultores
+
+`aws` no es una fase del flujo: es un especialista al que el leader consulta cuando la
+feature toca infraestructura, pipelines, permisos o costos en AWS. Se pide **durante la
+fase de spec**, no durante la implementación: lo que devuelve —elección de servicios,
+compromisos, estimación de costo, pasos de despliegue— se escribe en `design.md` y queda
+aprobado por el humano como cualquier otra decisión técnica. Consultarlo con el código ya
+escrito llega tarde.
+
+Dos cosas que conviene tener claras:
+
+- El `aws` nunca modifica la cuenta. Escribe Terraform, CDK y workflows de CI en local, y
+  los comandos que despliegan te los entrega escritos para que los ejecutes vos.
+- **El IaC es código de producción a efectos de este arnés.** El hook bloquea escribir un
+  `.tf` igual que un `.py` si no hay una tarea `in_progress`. Un cambio de infraestructura
+  pasa por spec como cualquier otro — que sea infraestructura no lo hace trivial, lo hace
+  más caro de revertir.
 
 ## Estados de una tarea
 

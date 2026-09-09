@@ -26,6 +26,7 @@ docs/
   spec-author.md              ← requirements.md → clarificación → design.md → tasks.md
   implementer.md              ← ejecuta tasks.md, contexto mínimo
   reviewer.md                 ← aprueba o rechaza contra la spec
+  aws.md                      ← consultor: arquitectura, DevOps y costos en AWS
 .claude/settings.json         ← registra el hook que hace insaltable la regla de oro
 .claude/hooks/
   guard-spec-first.sh         ← bloquea escrituras en código si nada está in_progress
@@ -44,6 +45,23 @@ history.md                     ← histórico append-only de features completada
 init.sh                        ← script obligatorio: verificar entorno + correr tests
 .gitignore.example             ← para uso personal (renómbralo); en equipo, commitea todo
 ```
+
+## Agentes consultores
+
+Además de los cuatro roles del flujo hay especialistas que **no son una fase**: se consultan
+cuando hacen falta y su respuesta acaba escrita en `design.md`.
+
+Hoy hay uno, `aws`: elige entre servicios, diseña VPCs, escribe y revisa
+Terraform/CDK/CloudFormation, diseña pipelines de CI/CD y estrategias de rollback, lee logs,
+monta observabilidad, audita IAM y estima costos. Nunca modifica la cuenta: los comandos que
+despliegan te los entrega escritos para que los ejecutes vos.
+
+El leader lo consulta **durante la fase de spec**, antes de `design.md`. Con el código ya
+escrito llega tarde. Y ojo: el IaC cuenta como código de producción, así que el hook bloquea
+escribir un `.tf` igual que cualquier otro fichero si no hay una tarea `in_progress`.
+
+Para añadir más especialistas (`security-reviewer`, `db-migrator`, lo que necesites), copiá
+el patrón: un `.md` en `.claude/agents/` con su `description` diciendo cuándo invocarlo.
 
 ## Los dos gates automáticos
 
