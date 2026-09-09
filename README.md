@@ -56,9 +56,11 @@ Terraform/CDK/CloudFormation, diseña pipelines de CI/CD y estrategias de rollba
 monta observabilidad, audita IAM y estima costos. Nunca modifica la cuenta: los comandos que
 despliegan te los entrega escritos para que los ejecutes vos.
 
-El leader lo consulta **durante la fase de spec**, antes de `design.md`. Con el código ya
-escrito llega tarde. Y ojo: el IaC cuenta como código de producción, así que el hook bloquea
-escribir un `.tf` igual que cualquier otro fichero si no hay una tarea `in_progress`.
+**Solo se invoca explícitamente**: lo pedís vos por su nombre ("que lo mire el agente de
+aws"). Ningún agente lo lanza solo. El leader como mucho te lo sugiere en una línea cuando la
+feature toca infra, y el momento en que esa sugerencia vale algo es la fase de spec — con el
+código escrito llega tarde. Y ojo: el IaC cuenta como código de producción, así que el hook
+bloquea escribir un `.tf` igual que cualquier otro fichero si no hay una tarea `in_progress`.
 
 Para añadir más especialistas (`security-reviewer`, `db-migrator`, lo que necesites), copiá
 el patrón: un `.md` en `.claude/agents/` con su `description` diciendo cuándo invocarlo.

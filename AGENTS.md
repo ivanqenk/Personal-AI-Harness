@@ -84,12 +84,15 @@ gate ni escribir el fichero por otra vía.
 
 ## Agentes consultores
 
-`aws` no es una fase del flujo: es un especialista al que el leader consulta cuando la
-feature toca infraestructura, pipelines, permisos o costos en AWS. Se pide **durante la
-fase de spec**, no durante la implementación: lo que devuelve —elección de servicios,
-compromisos, estimación de costo, pasos de despliegue— se escribe en `design.md` y queda
-aprobado por el humano como cualquier otra decisión técnica. Consultarlo con el código ya
-escrito llega tarde.
+`aws` no es una fase del flujo, y tampoco se invoca solo: **solo lo lanza el humano,
+explícitamente y por su nombre**. Ningún agente lo llama por su cuenta porque el tema
+parezca de AWS.
+
+El leader puede sugerirlo en una línea cuando la feature toca infraestructura, pipelines,
+permisos o costos, y el momento en que la sugerencia vale algo es **la fase de spec**: lo
+que el especialista devuelva —servicios, compromisos, costo estimado, pasos de despliegue—
+se escribe en `design.md` y se aprueba como cualquier otra decisión técnica. Consultarlo
+con el código ya escrito llega tarde. Pero decidir si se consulta es tuyo.
 
 Dos cosas que conviene tener claras:
 
