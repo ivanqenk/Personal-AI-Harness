@@ -54,9 +54,9 @@ cuando hacen falta y su respuesta acaba escrita en `design.md`.
 Hoy hay uno, `aws`: elige entre servicios, diseña VPCs, escribe y revisa
 Terraform/CDK/CloudFormation, diseña pipelines de CI/CD y estrategias de rollback, lee logs,
 monta observabilidad, audita IAM y estima costos. Nunca modifica la cuenta: los comandos que
-despliegan te los entrega escritos para que los ejecutes vos.
+despliegan te los entrega escritos para que los ejecutes tú.
 
-**Solo se invoca explícitamente**: lo pedís vos por su nombre ("que lo mire el agente de
+**Solo se invoca explícitamente**: lo pides tú por su nombre ("que lo mire el agente de
 aws"). Ningún agente lo lanza solo. El leader como mucho te lo sugiere en una línea cuando la
 feature toca infra, y el momento en que esa sugerencia vale algo es la fase de spec — con el
 código escrito llega tarde. Y ojo: el IaC cuenta como código de producción, así que el hook

@@ -144,9 +144,9 @@ Existe un subagente `aws` (arquitectura cloud, DevOps, observabilidad, costos). 
 lances nunca por tu cuenta.** Solo lo invocás si el humano lo pide explícitamente y por su
 nombre.
 
-Lo que sí hacés: si la feature toca infraestructura, pipelines, permisos IAM o costos, y
-estás en fase de spec, **sugerílo en una línea** — "esto toca infra, ¿querés que lo mire el
-agente de aws antes del design?" — y seguí adelante con su respuesta, sea la que sea. La
+Lo que sí haces: si la feature toca infraestructura, pipelines, permisos IAM o costos, y
+estás en fase de spec, **sugiérelo en una línea** — "esto toca infra, ¿quieres que lo mire el
+agente de aws antes del design?" — y sigue adelante con su respuesta, sea la que sea. La
 sugerencia sale barata en ese momento y cara después, con el código escrito; pero decidir si
 se paga la consulta es del humano, no tuyo.
 

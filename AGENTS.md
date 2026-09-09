@@ -97,7 +97,7 @@ con el código ya escrito llega tarde. Pero decidir si se consulta es tuyo.
 Dos cosas que conviene tener claras:
 
 - El `aws` nunca modifica la cuenta. Escribe Terraform, CDK y workflows de CI en local, y
-  los comandos que despliegan te los entrega escritos para que los ejecutes vos.
+  los comandos que despliegan te los entrega escritos para que los ejecutes tú.
 - **El IaC es código de producción a efectos de este arnés.** El hook bloquea escribir un
   `.tf` igual que un `.py` si no hay una tarea `in_progress`. Un cambio de infraestructura
   pasa por spec como cualquier otro — que sea infraestructura no lo hace trivial, lo hace
