@@ -54,30 +54,55 @@ else
   fallo "falta tasks.json en la raíz del repo."
 fi
 
-# Trazabilidad RF→test: cada requisito EARS de una feature en curso debe aparecer citado
-# por su id en algún test. Es lo que convierte el punto 3 del reviewer en algo objetivo.
+# Trazabilidad RF→test: cada requisito EARS de una feature con la implementación terminada
+# debe aparecer citado por su id en algún test. Es lo que convierte el punto 3 del reviewer
+# en algo objetivo. "Terminada" = status in_review o done, o in_progress sin ninguna casilla
+# [ ] en su tasks.md. Antes no se exige: una spec recién escrita todavía no tiene tests, y
+# exigirlos haría fallar init.sh justo cuando el leader lo ejecuta para pasarla a
+# in_progress, y al implementer en cada tarea intermedia.
 echo "==> Comprobando trazabilidad RF→test..."
 if [ -z "$RUTAS_TESTS" ]; then
   echo "    (RUTAS_TESTS vacío: check saltado)"
 else
-  sin_test=""
-  for req in specs/*/requirements.md; do
-    [ -f "$req" ] || continue
-    feature=$(basename "$(dirname "$req")")
-    [ "$feature" = "_template" ] && continue
-    while read -r num; do
-      [ -n "$num" ] || continue
-      # Acepta RF-3, RF_3 y RF3: en Python el id vive en el nombre de la función
-      # (test_RF3_...) y ahí el guion no es legal.
-      if ! grep -rqE "RF[-_]?${num}([^0-9]|\$)" $RUTAS_TESTS 2>/dev/null; then
-        sin_test="$sin_test\n  - $feature: RF-$num"
-      fi
-    done < <(grep -oE 'RF-[0-9]+' "$req" | grep -oE '[0-9]+' | sort -un)
-  done
-  if [ -n "$sin_test" ]; then
-    fallo "requisitos sin ningún test que los cite por id:$(printf "%b" "$sin_test")
+  command -v python3 >/dev/null 2>&1 \
+    || fallo "el check de trazabilidad necesita python3 para leer el estado de tasks.json."
+  python3 - $RUTAS_TESTS <<'PY' || fallo "requisitos sin ningún test que los cite por id (ver arriba).
        Convención: el nombre del test incluye el id (ej. test_RF3_… / it('RF-3: …'))."
-  fi
+import json, pathlib, re, sys
+tasks = json.load(open("tasks.json")).get("tasks", [])
+ficheros = []
+for raiz in map(pathlib.Path, sys.argv[1:]):
+    if raiz.is_file():
+        ficheros.append(raiz)
+    elif raiz.is_dir():
+        ficheros.extend(p for p in raiz.rglob("*") if p.is_file())
+corpus = "\n".join(p.read_text(errors="ignore") for p in ficheros)
+faltan, revisadas = [], 0
+for t in tasks:
+    if t.get("use_sdd") is False:
+        continue
+    spec = pathlib.Path(t.get("spec_path") or f"specs/{t.get('feature', '')}/")
+    req, tareas = spec / "requirements.md", spec / "tasks.md"
+    if not req.is_file():
+        continue
+    status = t.get("status")
+    terminada = status in ("in_review", "done") or (
+        status == "in_progress" and tareas.is_file()
+        and not re.search(r"^\s*- \[ \]", tareas.read_text(), re.M)
+    )
+    if not terminada:
+        continue
+    revisadas += 1
+    for num in sorted(set(re.findall(r"RF-(\d+)", req.read_text())), key=int):
+        # Acepta RF-3, RF_3 y RF3: en Python el id vive en el nombre de la función
+        # (test_RF3_...) y ahí el guion no es legal.
+        if not re.search(rf"RF[-_]?{num}(?!\d)", corpus):
+            faltan.append(f"  - {t.get('feature')}: RF-{num}")
+if faltan:
+    print("\n".join(faltan))
+    sys.exit(1)
+print(f"    {revisadas} feature(s) con la implementación terminada revisadas.")
+PY
 fi
 
 if [ "$PROYECTO_CONFIGURADO" != "true" ]; then

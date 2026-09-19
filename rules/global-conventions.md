@@ -28,9 +28,10 @@ trabajes con rama por feature o directamente sobre la principal.
 - Cobertura mínima esperada por feature: <opcional>
 - **Trazabilidad RF→test (regla del arnés, no negociable)**: el nombre de cada test cita el
   id del requisito que cubre — `test_RF3_...` en Python, `it('RF-3: ...')` en JS/PHP, lo
-  equivalente en tu framework. `init.sh` comprueba que cada `RF-x` de cada
-  `specs/*/requirements.md` aparece citado en `RUTAS_TESTS`; sin esa convención el check no
-  puede correr y la trazabilidad vuelve a ser una opinión.
+  equivalente en tu framework. `init.sh` comprueba que cada `RF-x` del `requirements.md` de
+  cada feature con la implementación terminada (`in_review`, `done`, o `in_progress` con
+  todas las casillas de `tasks.md` marcadas) aparece citado en `RUTAS_TESTS`; sin esa
+  convención el check no puede correr y la trazabilidad vuelve a ser una opinión.
 
 ## Estilo de código
 - Formateador/linter: <prettier, black, pint, ...> y comando para ejecutarlo

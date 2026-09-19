@@ -74,7 +74,8 @@ Estas dos piezas no:
   placeholders `<...>` en `rules/` o `docs/constitution.md`. Un `init.sh` que imprime "OK"
   sin ejecutar nada no es un gate: es confianza falsa, y el leader, el implementer y el
   reviewer estarían aprobando contra nada. También valida `tasks.json` y comprueba la
-  trazabilidad RF→test.
+  trazabilidad RF→test de las features con la implementación terminada (antes no la exige:
+  una spec recién escrita todavía no tiene tests).
 - **El hook `PreToolUse`** (`.claude/settings.json` → `.claude/hooks/guard-spec-first.sh`)
   bloquea cualquier escritura sobre código de producción si no hay ninguna tarea
   `in_progress` en `tasks.json`. Los ficheros del arnés se escriben siempre. Si te bloquea,
