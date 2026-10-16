@@ -127,12 +127,22 @@ Estas dos piezas no:
    entonces anexa el session-context completo a `history.md` y borra
    `progress/<feature>-session-context.md`.
 
-## Cuándo saltarte SDD (`use_sdd: false`)
+## Niveles: no todo pasa por SDD completo
 
-Para tareas muy pequeñas y sin ambigüedad (typos, un parámetro nuevo, un fix trivial),
-márcalas como `"use_sdd": false` en `tasks.json`. El leader se saltará spec-author y
-design.md, y mandará directo al implementer con una descripción de una línea. Úsalo con
-criterio: en caso de duda, deja SDD completo.
+Pasar un cambio de color por spec, implementer y reviewer gasta decenas de miles de tokens
+sin proteger de nada. Cada tarea lleva un `"nivel"` en `tasks.json`, que decide el leader al
+registrarla (criterios completos en `AGENTS.md`):
+
+- **`rapido`** — sin lógica: estilos, textos, typos, un valor de config. El leader lo hace
+  él mismo, sin subagentes, verifica con `./init.sh --rapido` (lint + un check de segundos)
+  y deja una línea en `history.md`.
+- **`ligero`** — lógica acotada y sin ambigüedad. Sin spec; implementer y reviewer en modo
+  reducido.
+- **`completo`** — el flujo de arriba.
+
+Auth, permisos, pagos, datos personales, migraciones, IaC y API pública nunca bajan de
+`ligero`. Si un cambio `rapido` resulta tener lógica, el leader para y lo sube de nivel.
+Las tareas antiguas con `"use_sdd": false` se tratan como `ligero`.
 
 ## Alternativa: método simplificado (sin subagentes)
 

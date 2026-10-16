@@ -27,7 +27,11 @@
    tenga el modelo del stack, más detallado tiene que ser este fichero.
 5. **Rellena `init.sh`** — comandos reales: instalar dependencias, linter, tests. Lo van a
    ejecutar el implementer y el reviewer antes de darse por terminados, así que tiene que
-   reflejar de verdad cómo se verifica el proyecto. Si el código no vive en un filesystem
+   reflejar de verdad cómo se verifica el proyecto. Se rellena en variables (`CMD_DEPS`,
+   `CMD_LINT`, `CMD_TESTS`) más `CMD_RAPIDO`: lo que corre `./init.sh --rapido` además del
+   lint en los cambios de nivel `rapido` — algo de segundos, como un typecheck o un build.
+   La salida es corta a propósito (una línea por paso, solo la cola si algo falla) para no
+   gastar tokens; `INIT_VERBOSE=1 ./init.sh` la muestra entera. Si el código no vive en un filesystem
    accesible por bash (mainframe, transportes SAP), `init.sh` tiene que ser un wrapper a lo
    que sí tengas accesible. Comprueba que conserva el bit de ejecución (`chmod +x init.sh`):
    los agentes lo invocan como `./init.sh`.
@@ -71,8 +75,19 @@ partir de ahí, el resto del ciclo es el mismo para los dos.
 2. En cualquiera de los dos casos, el `leader` registra la entrada en `tasks.json` y guarda
    el ticket completo (tal cual, sin que tú lo resumas) en
    `progress/<feature>-session-context.md`. Nunca tocas el JSON a mano.
-3. Si es algo trivial y sin ambigüedad, pide directamente `use_sdd: false` y sigue sin
-   pasar por spec completa.
+3. No todos los tickets pasan por todo el flujo. El `leader` clasifica cada uno en un
+   nivel y te lo dice en una línea:
+   - **`rapido`** — sin lógica (un color, un texto, un typo, espaciados). Lo hace el propio
+     leader, sin subagentes, verifica con `./init.sh --rapido` y te enseña el diff. No hay
+     spec, review ni resumen final: queda una línea en `history.md`. Para pedirlo directo:
+     *"Cambio rápido: \<qué y dónde\>."*
+   - **`ligero`** — lógica acotada y sin ambigüedad (un parámetro nuevo, un bug con causa
+     clara). Sin spec: implementer y reviewer en modo reducido, resumen corto al cerrar.
+   - **`completo`** — todo lo demás: el flujo que se describe abajo.
+
+   Si no estás de acuerdo con el nivel, díselo. Auth, permisos, pagos, datos personales,
+   migraciones, IaC y API pública nunca bajan de `ligero`, por pequeño que sea el cambio.
+   Y si a mitad de un cambio `rapido` aparece lógica, el leader para y lo sube de nivel.
 
 ### Flujo B — Continuar algo ya en curso
 

@@ -29,6 +29,18 @@ necesita opus. Si la feature toca seguridad, permisos, dinero o una decisión de
 arquitectura difícil de revertir, dile al humano que invoque `/model opus` antes de esta
 review; no lo decidas tú solo por defecto.
 
+## Modo reducido (nivel `ligero`)
+
+Si el leader te dice que la tarea es de nivel `ligero`, no hay `specs/` contra la que
+medir: el alcance se mide contra la descripción del ticket en el session-context. Haz solo
+los puntos 1 (contra esa descripción), 2, 5 y 6 de abajo, y el 7 solo si hubo correcciones
+del humano. Sáltate trazabilidad y diseño. El veredicto es el mismo: APROBADO o RECHAZADO,
+y "no apruebes en general" sigue valiendo.
+
+Si al ver el diff resulta que el cambio no era `ligero` (toca algo de la lista de "Niveles
+de proceso" de `AGENTS.md`, o tomó decisiones de diseño), RECHAZA indicando que debe
+subir a `completo`.
+
 ## Qué revisas, en este orden
 
 1. **Alcance exacto**: compara el diff contra `specs/<feature>/requirements.md` y pregúntate

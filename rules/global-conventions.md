@@ -21,10 +21,12 @@ trabajes con rama por feature o directamente sobre la principal.
   muestra el resumen final y espera un "sí" antes de archivar en `history.md`. Si prefieres
   que cierre solo cuando el reviewer aprueba, cámbialo aquí y en `.claude/agents/leader.md`
   — pero cámbialo en los dos sitios, no dejes que se contradigan.
+- Excepción: las tareas de nivel `rapido` se cierran sin pedir confirmación (el humano ya
+  ve el diff) y sin aprobación de spec, porque no la tienen.
 
 ## Testing
 - Framework de tests: <pytest / jest / phpunit / ...>
-- Comando para correr toda la suite: <comando> (debe coincidir con lo que hace `init.sh`)
+- Comando para correr toda la suite: <comando> (debe coincidir con `CMD_TESTS` de `init.sh`)
 - Cobertura mínima esperada por feature: <opcional>
 - **Trazabilidad RF→test (regla del arnés, no negociable)**: el nombre de cada test cita el
   id del requisito que cubre — `test_RF3_...` en Python, `it('RF-3: ...')` en JS/PHP, lo

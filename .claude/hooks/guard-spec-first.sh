@@ -7,7 +7,7 @@
 #
 # Bloquea escrituras sobre ficheros de producción salvo que en tasks.json haya al menos
 # una tarea con status "in_progress" (que es el estado al que solo se llega tras la
-# aprobación humana de la spec, o directamente si la tarea es "use_sdd": false).
+# aprobación humana de la spec, o directamente si la tarea es de nivel "rapido" o "ligero").
 #
 # Los ficheros del propio arnés (specs/, progress/, docs/, rules/, tasks.json...) se
 # escriben siempre: son justo lo que hay que poder editar ANTES de tener una spec.
@@ -87,7 +87,8 @@ La regla de oro de AGENTS.md: no se implementa nada sin spec aprobada por el hum
 Salidas legítimas, según en qué fase estés:
   - Falta la spec        -> lanza al spec-author; escribe en specs/<feature>/, no aquí.
   - Spec en spec_ready   -> pídele al humano que la apruebe y pon la tarea en in_progress.
-  - Tarea trivial        -> márcala "use_sdd": false y pásala a in_progress.
+  - Tarea trivial        -> regístrala con "nivel": "rapido" o "ligero" y pásala a
+                            in_progress (criterios en "Niveles de proceso" de AGENTS.md).
   - Review en curso      -> el reviewer no arregla el código que juzga; RECHAZA con notas
                             y que el leader devuelva la tarea a in_progress.
 

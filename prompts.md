@@ -14,7 +14,9 @@ en la raíz del repo (donde está `CLAUDE.md`).
 | Contestar preguntas abiertas | `Respuestas a las preguntas abiertas de <feature>: <1> ... <2> ...` — saca la tarea de `needs_clarification` y el spec-author sigue desde `design.md`. |
 | Aprobar spec | `Apruebo la spec de <feature>. Pásala a in_progress.` |
 | Pedir cambios en la spec | `La spec de <feature> no está bien: <qué cambiar>. Actualiza requirements.md/design.md y vuelve a pedirme aprobación.` |
-| Saltar SDD en una tarea trivial | `Marca <feature> con use_sdd: false e impleméntala directamente: <descripción corta>.` |
+| Cambio sin lógica (color, texto, typo, estilos) | `Cambio rápido: <qué cambiar y dónde>.` — nivel `rapido`: lo hace el leader sin subagentes, verifica con `init.sh --rapido` y deja una línea en history.md. |
+| Lógica pequeña y sin ambigüedad | `Tarea ligera: <descripción>.` — nivel `ligero`: sin spec, implementer + reviewer en modo reducido. |
+| Forzar el flujo completo | `Pásalo por SDD completo: <ticket>.` |
 | Forzar revisión | `Lanza al reviewer sobre <feature> aunque el implementer no lo haya pedido todavía.` |
 | Rechazar en review | `El reviewer tiene razón / no la tiene en <punto concreto>. <qué hacer>.` |
 | Cambiar una feature ya terminada | `Necesito cambiar el comportamiento de <feature> ya hecha: <qué cambia>. Empieza editando su spec, no el código.` |
@@ -30,3 +32,10 @@ en la raíz del repo (donde está `CLAUDE.md`).
   quedaría sin poder llamar a los demás.
 - Si usas otra CLI (Codex, Cursor, opencode...) en vez de Claude Code, estos mismos prompts
   valen igual porque el contexto vive en `AGENTS.md`, no en algo específico de Claude Code.
+- No hace falta que digas el nivel: el leader clasifica cada ticket (`rapido`, `ligero`,
+  `completo`) y te lo dice en una línea. Corrígelo si no estás de acuerdo. Lo que toca
+  auth, permisos, pagos, datos personales, migraciones, IaC o API pública nunca baja de
+  `ligero`.
+- Si corres tú los tests o el linter a mano (suite lenta, entorno que la IA no tiene), pega
+  solo el resumen de fallos, no la salida entera: cuesta los mismos tokens que si la IA lo
+  ejecutara.

@@ -5,12 +5,28 @@
 #
 # Este script falla A PROPÓSITO en una instalación recién copiada. Un arnés cuyo único
 # gate objetivo devuelve "OK" sin ejecutar nada es peor que no tener gate: da confianza
-# falsa. Rellena las dos secciones marcadas CONFIGURAR y pon PROYECTO_CONFIGURADO=true.
+# falsa. Rellena la sección CONFIGURAR (RUTAS_TESTS y los CMD_*) y pon
+# PROYECTO_CONFIGURADO=true.
+#
+# Uso:
+#   ./init.sh            verificación completa (deps, lint, suite de tests, trazabilidad)
+#   ./init.sh --rapido   solo lint + CMD_RAPIDO, para tareas de nivel "rapido"
+#
+# La salida es deliberadamente corta: cada línea que llega al chat la paga el modelo. Un paso
+# que pasa imprime una línea; uno que falla, solo las últimas INIT_MAX_LINEAS (40 por defecto).
+# Para ver la salida entera al depurar a mano: INIT_VERBOSE=1 ./init.sh
 
 set -euo pipefail
 
+MODO=completo
+case "${1:-}" in
+  --rapido) MODO=rapido ;;
+  "") ;;
+  *) echo "uso: $0 [--rapido]" >&2; exit 2 ;;
+esac
+
 # ---------------------------------------------------------------------------
-# CONFIGURAR (1/2): ponlo a true cuando hayas rellenado los comandos reales de abajo.
+# CONFIGURAR: ponlo a true cuando hayas rellenado RUTAS_TESTS y los CMD_* de abajo.
 # ---------------------------------------------------------------------------
 PROYECTO_CONFIGURADO=false
 
@@ -18,7 +34,40 @@ PROYECTO_CONFIGURADO=false
 # trazabilidad RF→test. Déjalo vacío para saltarte ese check.
 RUTAS_TESTS=""
 
+# Comandos reales del stack. Uno vacío se salta, avisándolo en una línea.
+CMD_ENTORNO=""   # ej: command -v node >/dev/null
+CMD_DEPS=""      # ej: npm ci --silent / composer install -q / pip install -q -r requirements.txt
+CMD_LINT=""      # ej: npm run -s lint / ./vendor/bin/pint --test / ruff check .
+CMD_TESTS=""     # ej: npm test --silent / php artisan test / pytest -q
+# Lo que corre --rapido además del lint: algo que tarde segundos y pille lo que un cambio de
+# estilos o textos puede romper (typecheck, build, snapshots). Vacío = solo lint.
+CMD_RAPIDO=""    # ej: npx tsc --noEmit / npm run -s build
+
 fallo() { echo "ERROR: $*" >&2; exit 1; }
+
+MAX_LINEAS="${INIT_MAX_LINEAS:-40}"
+# paso <nombre> <comando>: en silencio si pasa, solo la cola de la salida si falla.
+paso() {
+  local nombre="$1" cmd="$2" log
+  if [ -z "$cmd" ]; then
+    echo "    $nombre: sin configurar, saltado"
+    return 0
+  fi
+  if [ "${INIT_VERBOSE:-0}" = "1" ]; then
+    bash -c "$cmd" || fallo "$nombre falló ($cmd)"
+    return 0
+  fi
+  log=$(mktemp)
+  if bash -c "$cmd" >"$log" 2>&1; then
+    echo "    $nombre: OK"
+    rm -f "$log"
+  else
+    echo "ERROR: $nombre falló ($cmd). Últimas $MAX_LINEAS líneas:" >&2
+    tail -n "$MAX_LINEAS" "$log" >&2
+    rm -f "$log"
+    exit 1
+  fi
+}
 
 # ---------------------------------------------------------------------------
 # Checks del propio arnés (no tocar: son independientes del stack)
@@ -61,7 +110,9 @@ fi
 # exigirlos haría fallar init.sh justo cuando el leader lo ejecuta para pasarla a
 # in_progress, y al implementer en cada tarea intermedia.
 echo "==> Comprobando trazabilidad RF→test..."
-if [ -z "$RUTAS_TESTS" ]; then
+if [ "$MODO" = "rapido" ]; then
+  echo "    (--rapido: check saltado)"
+elif [ -z "$RUTAS_TESTS" ]; then
   echo "    (RUTAS_TESTS vacío: check saltado)"
 else
   command -v python3 >/dev/null 2>&1 \
@@ -79,7 +130,10 @@ for raiz in map(pathlib.Path, sys.argv[1:]):
 corpus = "\n".join(p.read_text(errors="ignore") for p in ficheros)
 faltan, revisadas = [], 0
 for t in tasks:
-    if t.get("use_sdd") is False:
+    # Solo las de nivel completo tienen requirements.md con RF-x. Sin "nivel", manda el
+    # use_sdd antiguo: false equivale a ligero.
+    nivel = t.get("nivel") or ("ligero" if t.get("use_sdd") is False else "completo")
+    if nivel != "completo":
         continue
     spec = pathlib.Path(t.get("spec_path") or f"specs/{t.get('feature', '')}/")
     req, tareas = spec / "requirements.md", spec / "tasks.md"
@@ -107,26 +161,30 @@ fi
 
 if [ "$PROYECTO_CONFIGURADO" != "true" ]; then
   fallo "init.sh todavía no está personalizado para este proyecto.
-       Rellena las secciones CONFIGURAR de abajo con los comandos reales (deps, linter,
-       tests) y pon PROYECTO_CONFIGURADO=true.
+       Rellena los CMD_* de la sección CONFIGURAR con los comandos reales (deps,
+       linter, tests) y pon PROYECTO_CONFIGURADO=true.
        Mientras esto no se haga, 'tests en verde' sería solo un echo: el leader, el
        implementer y el reviewer estarían aprobando contra nada."
 fi
 
 # ---------------------------------------------------------------------------
-# CONFIGURAR (2/2): comandos reales del stack.
+# Comandos del stack (se rellenan arriba, en CONFIGURAR).
 # ---------------------------------------------------------------------------
 
-echo "==> Verificando entorno..."
-# ej: command -v node >/dev/null || fallo "falta node"
+if [ "$MODO" = "rapido" ]; then
+  echo "==> Verificación rápida..."
+  paso "linter" "$CMD_LINT"
+  paso "rápido" "$CMD_RAPIDO"
+  echo "==> init.sh --rapido: OK."
+  exit 0
+fi
 
-echo "==> Instalando/verificando dependencias..."
-# ej: npm ci / composer install / pip install -r requirements.txt
+echo "==> Verificando entorno y dependencias..."
+paso "entorno" "$CMD_ENTORNO"
+paso "dependencias" "$CMD_DEPS"
 
-echo "==> Ejecutando linter..."
-# ej: npm run lint / ./vendor/bin/pint --test
-
-echo "==> Ejecutando tests..."
-# ej: npm test / php artisan test / pytest
+echo "==> Linter y tests..."
+paso "linter" "$CMD_LINT"
+paso "tests" "$CMD_TESTS"
 
 echo "==> init.sh: entorno OK."

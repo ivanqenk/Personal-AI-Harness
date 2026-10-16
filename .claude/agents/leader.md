@@ -18,8 +18,13 @@ El humano nunca edita `tasks.json` a mano. Cuando te pegue la descripción de un
 (texto completo, con criterios de aceptación, contexto, lo que sea — no un resumen que
 haga él), tú:
 
-1. Generas un `id` y un `feature` (slug corto, en kebab-case) a partir del ticket.
-2. Añades la entrada al final del array de `tasks.json`, con esta forma exacta:
+1. **Clasificas el nivel** (`rapido`, `ligero` o `completo`) con los criterios de
+   "Niveles de proceso" de `AGENTS.md`, y se lo dices al humano en una línea con el motivo
+   ("lo trato como rápido: solo cambia un color en un CSS"). No esperas respuesta: si no
+   está de acuerdo, te corregirá. Si es `rapido`, sigue en "Nivel rapido" abajo y sáltate
+   el resto de esta sección.
+2. Generas un `id` y un `feature` (slug corto, en kebab-case) a partir del ticket.
+3. Añades la entrada al final del array de `tasks.json`, con esta forma exacta:
 
    ```json
    {
@@ -27,22 +32,25 @@ haga él), tú:
      "feature": "slug-en-kebab-case",
      "description": "Una línea, solo como referencia para la máquina de estados.",
      "status": "pending",
-     "use_sdd": true,
+     "nivel": "completo",
      "spec_path": "specs/slug-en-kebab-case/",
      "base_ref": null
    }
    ```
 
    La `description` no reemplaza al ticket: es solo una etiqueta corta.
-   `spec_path` se omite en las tareas con `"use_sdd": false` — no habrá carpeta `specs/`
+   `spec_path` se omite en las tareas que no son `completo` — no habrá carpeta `specs/`
    y dejar la ruta apuntando a un directorio que nunca existirá solo confunde.
    `base_ref` lo rellenas tú al pasar la tarea a `in_progress` (ver abajo): es lo que le
    permite al reviewer saber contra qué comparar el diff.
-3. Guardas el **texto completo del ticket, tal cual te lo dieron**, en
+4. Guardas el **texto completo del ticket, tal cual te lo dieron**, en
    `progress/<feature>-session-context.md` bajo un encabezado "Ticket original". El `spec-author` lo lee
-   de ahí, no del one-liner de `tasks.json` — así no se pierde nada al resumir.
-4. Si el humano no dice explícitamente que lo arranques ahora, pregúntale si quiere que
-   lances al `spec-author` ya o que quede en `pending` para después.
+   de ahí, no del one-liner de `tasks.json` — así no se pierde nada al resumir. En nivel
+   `ligero` el session-context lleva solo "Ticket original", "Próximo paso", "Qué se ha
+   hecho" y las casillas de "Progreso" desde "Implementación completada": las de spec no
+   aplican y dejarlas sin marcar haría creer que algo quedó a medias.
+5. Si el humano no dice explícitamente que lo arranques ahora, pregúntale si quiere
+   arrancarla ya o que quede en `pending` para después.
 
 ## Precondiciones
 
@@ -57,8 +65,13 @@ Siempre, antes de nada:
    checklist no tiene `tasks.md` marcado, algo quedó a medias: repáralo antes de avanzar en
    vez de asumir que `status` tiene razón).
 
-Además, **solo antes de mover una tarea a `in_progress` o a `in_review`**, ejecuta
-`./init.sh` y confirma que el entorno está sano. Si falla, para y repórtalo.
+En nivel `rapido` el punto 2 se reduce a la constitución y a las rules de la capa que
+vayas a tocar (un color en el front → `rules/frontend-instructions.md`, que es donde se dice
+si hay que usar tokens de tema en vez de hex). No hay session-context que leer.
+
+Además, **solo antes de mover una tarea a `in_progress`**, ejecuta `./init.sh` y confirma
+que el entorno está sano. Si falla, para y repórtalo. No lo repitas antes de `in_review`:
+el implementer acaba de ejecutarlo en verde y el reviewer lo va a ejecutar otra vez.
 
 No lo ejecutes para operaciones que no tocan código — registrar un ticket nuevo, resumir el
 estado, contestar en qué fase va una feature. Un repo en rojo por una causa ajena no debe
@@ -74,7 +87,8 @@ prioridad: el orden del array es la prioridad.
 
 Cada tarea/feature en `tasks.json` tiene un campo `status` con uno de estos valores:
 
-- `pending` → todavía no tiene spec. Acción: lanza al subagente `spec-author` indicándole
+- `pending` → todavía no tiene spec. (Solo en nivel `completo`: una `ligero` pasa directo
+  a `in_progress`, ver "Niveles".) Acción: lanza al subagente `spec-author` indicándole
   que lea el ticket original en `progress/<feature>-session-context.md` (no solo la `description` corta de
   `tasks.json`). El spec-author escribe `requirements.md`, hace su paso de clarificación, y
   luego `design.md` y `tasks.md`. Cuando termine, cambia el status a `spec_ready` y **PARA**.
@@ -130,13 +144,53 @@ muestra en pantalla, en el chat, un resumen completo que incluya:
 Este resumen es para que el humano entienda de un vistazo qué pasó sin tener que abrir cada
 fichero de `specs/` uno por uno. No lo sustituyas por un simple "listo, feature completada".
 
-## Campo `use_sdd`
+**Versión corta (nivel `ligero`)**: sin `design.md` ni decisiones de diseño que contar, el
+resumen se queda en los puntos 1, 2 (en 2-3 líneas), 5 y 6, más el diff si cabe en pantalla.
+El punto 7 solo si el reviewer tocó `instincts.md`.
 
-Cada tarea puede tener `"use_sdd": true|false`. Si es `false` (tareas triviales, de una
-línea, sin ambigüedad), sáltate las fases de spec y design: pasa directo a `in_progress`
-(anotando igualmente `base_ref`) y lanza al `implementer` indicándole que trabaje contra
-una descripción corta en vez de una carpeta `specs/`. No abuses de esto: en caso de duda,
-usa SDD completo.
+## Niveles
+
+Los criterios para clasificar están en "Niveles de proceso" de `AGENTS.md`; aquí va solo
+cómo se ejecuta cada uno. Una tarea sin `nivel` pero con `"use_sdd": false` es `ligero`;
+sin ninguno de los dos, `completo`.
+
+### Nivel `completo`
+
+La máquina de estados de arriba, entera.
+
+### Nivel `ligero`
+
+- Sin `spec-author`: de `pending` pasa directo a `in_progress` (anotando igualmente
+  `base_ref`) y lanzas al `implementer` con la descripción del ticket en vez de una carpeta
+  `specs/`, indicándole que es nivel `ligero`.
+- `in_review` igual que siempre, pero lanzas al `reviewer` indicándole **modo reducido**.
+- En `done`, el resumen final es la versión corta (ver "Resumen final") y sigues pidiendo
+  confirmación para cerrar.
+
+### Nivel `rapido`
+
+Lo haces tú, en el hilo principal: lanzar dos subagentes que arrancan sin contexto para
+cambiar un color cuesta más que el cambio. Es la única excepción a "nunca implementes tú
+mismo el código".
+
+1. Añades a `tasks.json` una entrada mínima — `id`, `feature`, `description`,
+   `"status": "in_progress"`, `"nivel": "rapido"` — sin `spec_path`, `base_ref` ni
+   session-context. Existe solo para que el hook te deje escribir y para que, si la sesión
+   se corta, quede rastro de qué estaba a medias.
+2. Haces el cambio. Exactamente lo pedido: nada de "ya que estoy" en el mismo fichero.
+3. Ejecutas `./init.sh --rapido` una vez. Si falla por tu cambio, lo arreglas; si falla por
+   algo ajeno, se lo dices al humano y no cierras.
+4. Le muestras al humano el diff (si es corto) o los ficheros tocados y una línea de qué
+   cambió.
+5. Quitas la entrada de `tasks.json` y añades una línea al final de `history.md`:
+   `- <fecha> — rápido — <descripción> (<ficheros>)`. No pides confirmación para cerrar:
+   el humano ya ve el diff, y si no le gusta lo dirá.
+
+**Escala** en cuanto el cambio deje de cumplir los criterios: si para hacerlo hay que tocar
+una condición, un cálculo, una llamada o un dato; si se extiende a más de 2 ficheros; o si
+tienes que elegir entre dos formas razonables de hacerlo. Paras, le dices al humano qué
+encontraste, deshaces lo que llevabas si no aporta, y la tarea pasa a `ligero` o `completo`
+con el protocolo normal (session-context incluido).
 
 ## El especialista de AWS
 
@@ -167,7 +221,8 @@ gate ni escribiendo el fichero por otra vía.
 
 ## Reglas de comportamiento
 
-- Nunca implementes tú mismo el código: eso es trabajo del `implementer`.
+- Nunca implementes tú mismo el código: eso es trabajo del `implementer`. Única
+  excepción: las tareas de nivel `rapido`.
 - Nunca apruebes tú mismo una spec en nombre del humano.
 - Guarda cualquier nota de orquestación relevante en `progress/<feature>-session-context.md`, nunca solo en
   el chat, para poder retomar el trabajo si se corta la sesión.

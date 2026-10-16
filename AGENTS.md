@@ -59,7 +59,7 @@ nombre ("retoma <feature>").
 - `history.md` — histórico append-only de features completadas.
 - `init.sh` — script obligatorio para verificar entorno y ejecutar tests. El `implementer` y el
   `reviewer` deben ejecutarlo antes de darse por terminados; el leader solo antes de mover una
-  tarea a `in_progress` o `in_review`. Falla a propósito mientras no esté personalizado para el
+  tarea a `in_progress`, y con `--rapido` al cerrar una tarea de nivel `rapido`. Falla a propósito mientras no esté personalizado para el
   proyecto: un gate que aprueba sin ejecutar nada es peor que no tener gate.
 - `.claude/settings.json` + `.claude/hooks/` — el gate automático que hace insaltable la regla de
   oro (ver abajo).
@@ -71,9 +71,8 @@ Nunca implementes código de una feature nueva si no existe ya `specs/<feature>/
 `tasks.json`. `spec_ready` significa que la spec está escrita pero **todavía no aprobada**:
 no basta. Si no existe spec, lanza primero al `spec-author`.
 
-Única excepción: tareas marcadas `"use_sdd": false` en `tasks.json` — cambios triviales y sin
-ambigüedad (un typo, un parámetro nuevo) que van directas al `implementer` con una descripción
-de una línea. En caso de duda, usa SDD completo.
+Excepción: las tareas de nivel `rapido` o `ligero` (ver "Niveles de proceso" abajo), que no
+llevan spec porque no la necesitan.
 
 Esta regla no depende de que ningún agente se acuerde de ella: un hook `PreToolUse` bloquea
 toda escritura sobre código de producción mientras no haya una tarea `in_progress` en
@@ -81,6 +80,45 @@ toda escritura sobre código de producción mientras no haya una tarea `in_progr
 se escriben siempre, porque son justo lo que hay que poder editar *antes* de tener una spec.
 Si el hook bloquea algo, el arreglo es mover la tarea al estado que toca — nunca desactivar el
 gate ni escribir el fichero por otra vía.
+
+## Niveles de proceso
+
+No todo cambio merece las seis fases. Pasar un cambio de color por spec, implementer y
+reviewer cuesta decenas de miles de tokens para proteger contra un riesgo que no existe. Cada
+tarea lleva un campo `"nivel"` en `tasks.json`, y lo decide el leader al registrarla:
+
+| Nivel | Cuándo | Qué recorre |
+|---|---|---|
+| `rapido` | Cambio **sin lógica**: estilos, colores, textos, copys, typos, espaciados, iconos, un valor de config o una constante que no cambia comportamiento. 1-2 ficheros. | El leader lo hace él mismo, sin subagentes. Verifica con `./init.sh --rapido`. Una línea en `history.md`. |
+| `ligero` | Lógica **acotada y sin ambigüedad**: un parámetro nuevo, un bug con causa clara y arreglo localizado. Se puede describir en 1-3 frases sin decisiones de diseño. | Sin spec. `implementer` contra la descripción, `reviewer` en modo reducido, resumen corto al cerrar. |
+| `completo` | Todo lo demás: funcionalidad nueva, cambios de comportamiento, varias capas, cualquier cosa con decisiones de diseño o dudas. | El flujo SDD entero. |
+
+**Nunca son `rapido` ni `ligero`**, por pequeño que sea el cambio: autenticación, permisos,
+dinero/pagos, datos personales, migraciones o esquema de BD, IaC y despliegue, contratos de
+API pública, y cualquier cosa que contradiga o roce `docs/constitution.md`. Ahí el tamaño
+del diff no dice nada del riesgo.
+
+**Escalado**: si al trabajar una tarea `rapido` aparece lógica, o una `ligero` necesita una
+decisión de diseño, se para y se sube de nivel avisando al humano. Escalar es barato;
+equivocarse a la baja no. Por eso el leader puede clasificar con generosidad, pero nunca
+bajar el nivel de una tarea ya empezada sin que el humano lo pida.
+
+El humano siempre puede forzar el nivel ("hazlo rápido", "pásalo por SDD completo"), salvo
+la lista de arriba, que no baja de `ligero` aunque lo pida — en ese caso el leader le avisa
+del motivo y le deja decidir entre `ligero` o `completo`.
+
+Las tareas antiguas con `"use_sdd": false` y sin `nivel` se tratan como `ligero`.
+
+## Verificación y tokens
+
+Cada línea que un comando escribe en el chat la paga el modelo. `init.sh` está hecho para
+eso: si un paso pasa, imprime una línea; si falla, solo la cola de la salida. No lo
+sustituyas por llamadas sueltas a la suite con salida completa, y no lo ejecutes dos veces
+seguidas sin haber cambiado nada entre medias.
+
+Si la suite es lenta o necesita un entorno que la IA no tiene (BD real, emuladores,
+dispositivos), el humano puede correrla a mano y pegar solo el resumen de fallos: vale como
+verificación si lo indica explícitamente.
 
 ## Agentes consultores
 
@@ -106,9 +144,11 @@ Dos cosas que conviene tener claras:
 ## Estados de una tarea
 
 `pending` → `needs_clarification` (si la spec topa con preguntas que solo el humano resuelve)
-→ `spec_ready` → `in_progress` → `in_review` → `done`. Ninguno es opcional: el `status` por sí
-solo debe bastar para saber en qué fase estás si la sesión se corta. El detalle de cada
-transición está en `.claude/agents/leader.md`.
+→ `spec_ready` → `in_progress` → `in_review` → `done`. En nivel `completo` ninguno es
+opcional: el `status` por sí solo debe bastar para saber en qué fase estás si la sesión se
+corta. `ligero` entra directo en `in_progress`; `rapido` también, y al terminar sale de
+`tasks.json` sin pasar por `in_review`. El detalle de cada transición está en
+`.claude/agents/leader.md`.
 
 ## Principio de cambio (spec-first)
 

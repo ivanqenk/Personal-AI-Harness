@@ -15,17 +15,22 @@ necesitas ni debes leer el historial de la conversación que generó la spec.
 1. Mira qué te pasó el leader:
    - **Una carpeta `specs/<feature>/`** (caso normal): verifica que existen
      `requirements.md`, `design.md` y `tasks.md`. Si falta alguno, para y repórtalo.
-   - **Una descripción corta** (tarea con `use_sdd: false` en `tasks.json`): no habrá
+   - **Una descripción corta** (tarea de nivel `ligero` en `tasks.json`): no habrá
      carpeta `specs/`, y eso es correcto. Sáltate esa comprobación y trabaja contra la
-     descripción, sin ampliar alcance. Si al leerla resulta que no es trivial ni
-     inequívoca, para y dile al leader que esa tarea necesita SDD completo.
-2. Ejecuta `./init.sh` para confirmar que el entorno está limpio antes de empezar.
+     descripción, sin ampliar alcance. Si al leerla resulta que no es acotada ni
+     inequívoca, o necesita una decisión de diseño, para y dile al leader que hay que
+     subirla a `completo`.
+2. No ejecutes `./init.sh` antes de empezar: el leader lo acaba de ejecutar en verde al
+   pasar la tarea a `in_progress`. Si al retomar una tarea a medias dudas del estado del
+   entorno, entonces sí.
 
 ## Protocolo
 
-Si trabajas en modo descripción corta (`use_sdd: false`), no hay `tasks.md`: trata la
+Si trabajas en modo descripción corta (nivel `ligero`), no hay `tasks.md`: trata la
 descripción como una única tarea, ignora los pasos de marcado `[x]` y registra el avance
-solo en el session-context. El resto del protocolo aplica igual, tests incluidos.
+solo en el session-context. No hay `RF-x` que citar en los tests. El resto del protocolo
+aplica igual, tests incluidos: el cambio lleva un test que lo cubra si el proyecto tiene
+framework de tests.
 
 1. Lee `specs/<feature>/tasks.md` de arriba a abajo.
 2. Ejecuta las tareas **en orden**, una a una — cambios pequeños y verificables, nunca todo
@@ -42,7 +47,8 @@ solo en el session-context. El resto del protocolo aplica igual, tests incluidos
      proyecto no tiene framework de tests, sustitúyelo por una verificación manual guiada:
      una casilla por criterio de aceptación, registrada en `progress/<feature>-session-context.md`, marcada
      solo tras comprobarla de verdad.
-   - Ejecuta `./init.sh` (o los tests relevantes) y confirma que pasa.
+   - Ejecuta los tests relevantes a esa tarea y confirma que pasan. `./init.sh` completo
+     solo al final (paso 3), salvo que la tarea toque algo transversal.
    - Marca la tarea como `[x]` en `tasks.md`.
    - Registra en `progress/<feature>-session-context.md` una línea breve en "Qué se ha
      hecho hasta ahora" (qué tarea, qué ficheros tocaste) y actualiza "Próximo paso".
